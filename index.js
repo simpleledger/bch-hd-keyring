@@ -1,11 +1,12 @@
 const EventEmitter = require('events').EventEmitter
-const hdkey = require('ethereumjs-wallet/hdkey')
-const bip39 = require('bip39')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
 
+const BITBOXCli = require('bitbox-cli/lib/bitbox-cli').default
+const BITBOX = new BITBOXCli()
+
 // Options:
-const hdPathString = `m/44'/60'/0'/0`
+const hdPathString = "m/44'/145'/0'"
 const type = 'HD Key Tree'
 
 class HdKeyring extends EventEmitter {
@@ -46,26 +47,26 @@ class HdKeyring extends EventEmitter {
 
   addAccounts (numberOfAccounts = 1) {
     if (!this.root) {
-      this._initFromMnemonic(bip39.generateMnemonic())
+      this._initFromMnemonic(BITBOX.Mnemonic.generate(256))
     }
 
     const oldLen = this.wallets.length
     const newWallets = []
     for (let i = oldLen; i < numberOfAccounts + oldLen; i++) {
-      const child = this.root.deriveChild(i)
-      const wallet = child.getWallet()
+      const child = BITBOX.HDNode.derivePath(this.root, `0/${i}`)
+      const wallet = BITBOX.HDNode.toKeyPair(child)
       newWallets.push(wallet)
       this.wallets.push(wallet)
     }
     const hexWallets = newWallets.map((w) => {
-      return sigUtil.normalize(w.getAddress().toString('hex'))
+      return this._getAddress(w)
     })
     return Promise.resolve(hexWallets)
   }
 
   getAccounts () {
     return Promise.resolve(this.wallets.map((w) => {
-      return sigUtil.normalize(w.getAddress().toString('hex'))
+      return this._getAddress(w)
     }))
   }
 
@@ -118,7 +119,8 @@ class HdKeyring extends EventEmitter {
 
   exportAccount (address) {
     const wallet = this._getWalletForAccount(address)
-    return Promise.resolve(wallet.getPrivateKey().toString('hex'))
+    const privateKey = BITBOX.ECPair.toWIF(wallet)
+    return Promise.resolve(privateKey)
   }
 
 
@@ -126,18 +128,21 @@ class HdKeyring extends EventEmitter {
 
   _initFromMnemonic (mnemonic) {
     this.mnemonic = mnemonic
-    const seed = bip39.mnemonicToSeed(mnemonic)
-    this.hdWallet = hdkey.fromMasterSeed(seed)
-    this.root = this.hdWallet.derivePath(this.hdPath)
+
+    const seed = BITBOX.Mnemonic.toSeed(mnemonic)
+    this.hdWallet = BITBOX.HDNode.fromSeed(seed, 'bitcoincash')
+    this.root = BITBOX.HDNode.derivePath(this.hdWallet, this.hdPath)
   }
 
+  _getAddress(keypair) {
+    return BITBOX.ECPair.toCashAddress(keypair)
+  }
 
   _getWalletForAccount (account) {
-    const targetAddress = sigUtil.normalize(account)
+    const targetAddress = account
     return this.wallets.find((w) => {
-      const address = sigUtil.normalize(w.getAddress().toString('hex'))
-      return ((address === targetAddress) ||
-              (sigUtil.normalize(address) === targetAddress))
+      const address = this._getAddress(w)
+      return (address === targetAddress)
     })
   }
 }
