@@ -117,6 +117,11 @@ class HdKeyring extends EventEmitter {
     return Promise.resolve(rawMsgSig)
   }
 
+  exportKeyPair (address) {
+    const wallet = this._getWalletForAccount(address)
+    return Promise.resolve(wallet)
+  }
+
   exportAccount (address) {
     const wallet = this._getWalletForAccount(address)
     const privateKey = BITBOX.ECPair.toWIF(wallet)
