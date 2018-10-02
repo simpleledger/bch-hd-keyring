@@ -47,7 +47,7 @@ class HdKeyring extends EventEmitter {
 
   addAccounts (numberOfAccounts = 1) {
     if (!this.root) {
-      this._initFromMnemonic(BITBOX.Mnemonic.generate(256))
+      this._initFromMnemonic(BITBOX.Mnemonic.generate(128))
     }
 
     const oldLen = this.wallets.length

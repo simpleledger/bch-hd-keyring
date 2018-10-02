@@ -1,6 +1,6 @@
 {
   "name": "bch-hd-keyring",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A simple standard interface for a seed phrase generated set of Bitcoin Cash accounts.",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "ethereum",
     "keyring"
   ],
-  "author": "Dan Finlay",
+  "author": "SpendBCH",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/simpleledger/bch-hd-keyring/issues"
