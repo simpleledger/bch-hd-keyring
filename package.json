@@ -23,7 +23,6 @@
   "dependencies": {
     "bip39": "^2.2.0",
     "bitbox-cli": "^1.7.0",
-    "eth-sig-util": "^2.0.1",
     "ethereumjs-abi": "^0.6.5",
     "ethereumjs-util": "^5.1.1",
     "ethereumjs-wallet": "^0.6.0",

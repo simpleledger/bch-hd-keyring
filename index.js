@@ -1,6 +1,4 @@
 const EventEmitter = require('events').EventEmitter
-const ethUtil = require('ethereumjs-util')
-const sigUtil = require('eth-sig-util')
 
 const BITBOXCli = require('bitbox-cli/lib/bitbox-cli').default
 const BITBOX = new BITBOXCli()
@@ -80,42 +78,49 @@ class HdKeyring extends EventEmitter {
 
   // For eth_sign, we need to sign transactions:
   // hd
-  signMessage (withAccount, data) {
+  signMessage (withAccount, message) {
     const wallet = this._getWalletForAccount(withAccount)
-    const message = ethUtil.stripHexPrefix(data)
-    var privKey = wallet.getPrivateKey()
-    var msgSig = ethUtil.ecsign(new Buffer(message, 'hex'), privKey)
-    var rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
-    return Promise.resolve(rawMsgSig)
-  }
-
-  // For personal_sign, we need to prefix the message:
-  signPersonalMessage (withAccount, msgHex) {
-    const wallet = this._getWalletForAccount(withAccount)
-    const privKey = ethUtil.stripHexPrefix(wallet.getPrivateKey())
-    const privKeyBuffer = new Buffer(privKey, 'hex')
-    const sig = sigUtil.personalSign(privKeyBuffer, { data: msgHex })
-    return Promise.resolve(sig)
-  }
-
-  // personal_signTypedData, signs data along with the schema
-  signTypedData (withAccount, typedData) {
-    const wallet = this._getWalletForAccount(withAccount)
-    const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
-    const signature = sigUtil.signTypedData(privKey, { data: typedData })
+    const privKey = BITBOX.ECPair.toWIF(wallet)
+    const signature = BITBOX.BitcoinCash.signMessageWithPrivKey(privKey, message)
     return Promise.resolve(signature)
   }
 
-  // For eth_sign, we need to sign transactions:
-  newGethSignMessage (withAccount, msgHex) {
-    const wallet = this._getWalletForAccount(withAccount)
-    const privKey = wallet.getPrivateKey()
-    const msgBuffer = ethUtil.toBuffer(msgHex)
-    const msgHash = ethUtil.hashPersonalMessage(msgBuffer)
-    const msgSig = ethUtil.ecsign(msgHash, privKey)
-    const rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
-    return Promise.resolve(rawMsgSig)
-  }
+  // signMessage (withAccount, data) {
+  //   const wallet = this._getWalletForAccount(withAccount)
+  //   const message = ethUtil.stripHexPrefix(data)
+  //   var privKey = wallet.getPrivateKey()
+  //   var msgSig = ethUtil.ecsign(new Buffer(message, 'hex'), privKey)
+  //   var rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
+  //   return Promise.resolve(rawMsgSig)
+  // }
+
+  // // For personal_sign, we need to prefix the message:
+  // signPersonalMessage (withAccount, msgHex) {
+  //   const wallet = this._getWalletForAccount(withAccount)
+  //   const privKey = ethUtil.stripHexPrefix(wallet.getPrivateKey())
+  //   const privKeyBuffer = new Buffer(privKey, 'hex')
+  //   const sig = sigUtil.personalSign(privKeyBuffer, { data: msgHex })
+  //   return Promise.resolve(sig)
+  // }
+
+  // // personal_signTypedData, signs data along with the schema
+  // signTypedData (withAccount, typedData) {
+  //   const wallet = this._getWalletForAccount(withAccount)
+  //   const privKey = ethUtil.toBuffer(wallet.getPrivateKey())
+  //   const signature = sigUtil.signTypedData(privKey, { data: typedData })
+  //   return Promise.resolve(signature)
+  // }
+
+  // // For eth_sign, we need to sign transactions:
+  // newGethSignMessage (withAccount, msgHex) {
+  //   const wallet = this._getWalletForAccount(withAccount)
+  //   const privKey = wallet.getPrivateKey()
+  //   const msgBuffer = ethUtil.toBuffer(msgHex)
+  //   const msgHash = ethUtil.hashPersonalMessage(msgBuffer)
+  //   const msgSig = ethUtil.ecsign(msgHash, privKey)
+  //   const rawMsgSig = ethUtil.bufferToHex(sigUtil.concatSig(msgSig.v, msgSig.r, msgSig.s))
+  //   return Promise.resolve(rawMsgSig)
+  // }
 
   exportKeyPair (address) {
     const wallet = this._getWalletForAccount(address)
