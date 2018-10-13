@@ -1,7 +1,7 @@
 const EventEmitter = require('events').EventEmitter
 
-const BITBOXCli = require('bitbox-cli/lib/bitbox-cli').default
-const BITBOX = new BITBOXCli()
+const BITBOXSDK = require('bitbox-sdk/lib/bitbox-sdk').default
+const BITBOX = new BITBOXSDK()
 
 // Options:
 const hdPathString = "m/44'/145'/0'"

@@ -1,6 +1,6 @@
 {
   "name": "bch-hd-keyring",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A simple standard interface for a seed phrase generated set of Bitcoin Cash accounts.",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,7 @@
   "homepage": "https://github.com/simpleledger/bch-hd-keyring#readme",
   "dependencies": {
     "bip39": "^2.2.0",
-    "bitbox-cli": "^1.7.0",
+    "bitbox-sdk": "^2.0.1",
     "ethereumjs-abi": "^0.6.5",
     "ethereumjs-util": "^5.1.1",
     "ethereumjs-wallet": "^0.6.0",
