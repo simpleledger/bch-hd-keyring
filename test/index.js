@@ -6,7 +6,7 @@ const HdKeyring = require('../')
 
 const sampleMnemonic = 'please public safe pattern fatigue defense shield wonder law office inherit relax talent update input mirror ball wave short one you lab tenant forget'
 const firstAcct = 'bitcoincash:qp9ljw46rng4ecefu99ppmusunp79wgm9crfzh0k0t'
-const secondAcct = 'bitcoincash:qqjll95pdqj022swvpj6yfyet8u4ld7sxyh7s7fpge'
+const secondAcct = 'bitcoincash:qrgau4pcx378pdw7899l0p48gqwychy5sghpeyxs83'
 
 describe('hd-keyring', function() {
 
@@ -184,7 +184,7 @@ describe('hd-keyring', function() {
   describe('custom hd paths', function () {
 
     it('can deserialize with an hdPath param and generate the same accounts.', function (done) {
-      const hdPathString = "m/44'/145'/0'"
+      const hdPathString = "m/44'/145'"
 
       keyring.deserialize({
         mnemonic: sampleMnemonic,
