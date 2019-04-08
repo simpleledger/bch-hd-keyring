@@ -4,7 +4,8 @@ const BITBOXSDK = require('bitbox-sdk/lib/bitbox-sdk').default
 const BITBOX = new BITBOXSDK()
 
 // Options:
-const hdPathString = "m/44'/145'/0'"
+const hdPathString = "m/44'/145'"
+const slpHdPathString = "m/44'/245'"
 const type = 'HD Key Tree'
 
 class HdKeyring extends EventEmitter {
@@ -22,15 +23,18 @@ class HdKeyring extends EventEmitter {
       mnemonic: this.mnemonic,
       numberOfAccounts: this.wallets.length,
       hdPath: this.hdPath,
+      slpHdPath: this.slpHdPath,
     })
   }
 
   deserialize (opts = {}) {
     this.opts = opts || {}
     this.wallets = []
+    this.slpWallets = []
     this.mnemonic = null
     this.root = null
     this.hdPath = opts.hdPath || hdPathString
+    this.slpHdPath = opts.slpHdPath || slpHdPathString
 
     if (opts.mnemonic) {
       this._initFromMnemonic(opts.mnemonic)
@@ -44,18 +48,45 @@ class HdKeyring extends EventEmitter {
   }
 
   addAccounts (numberOfAccounts = 1) {
-    if (!this.root) {
+    if (!this.root || !this.slpRoot) {
       this._initFromMnemonic(BITBOX.Mnemonic.generate(128))
     }
 
     const oldLen = this.wallets.length
     const newWallets = []
     for (let i = oldLen; i < numberOfAccounts + oldLen; i++) {
-      const child = BITBOX.HDNode.derivePath(this.root, `0/${i}`)
+      const child = BITBOX.HDNode.derivePath(this.root, `${i}'/0/0`)
       const wallet = BITBOX.HDNode.toKeyPair(child)
       newWallets.push(wallet)
       this.wallets.push(wallet)
     }
+    const hexWallets = newWallets.map((w) => {
+      return this._getAddress(w)
+    })
+
+    // Add matching amount of SLP accounts
+    const slpAccountsToAdd = oldLen - this.slpWallets.length
+    if (slpAccountsToAdd > 0) {
+      this.addSlpAccounts(slpAccountsToAdd)
+    }
+
+    return Promise.resolve(hexWallets)
+  }
+
+  addSlpAccounts (numberOfAccounts = 1) {
+    if (!this.root || !this.slpRoot) {
+      this._initFromMnemonic(BITBOX.Mnemonic.generate(128))
+    }
+
+    const oldLen = this.slpWallets.length
+    const newWallets = []
+    for (let i = oldLen; i < numberOfAccounts + oldLen; i++) {
+      const child = BITBOX.HDNode.derivePath(this.slpRoot, `${i}'/0/0`)
+      const wallet = BITBOX.HDNode.toKeyPair(child)
+      newWallets.push(wallet)
+      this.slpWallets.push(wallet)
+    }
+
     const hexWallets = newWallets.map((w) => {
       return this._getAddress(w)
     })
@@ -66,6 +97,22 @@ class HdKeyring extends EventEmitter {
     return Promise.resolve(this.wallets.map((w) => {
       return this._getAddress(w)
     }))
+  }
+
+  getSlpAccounts () {
+    return Promise.resolve(this.slpWallets.map((w) => {
+      return this._getAddress(w)
+    }))
+  }
+
+  getAllAccounts () {
+    const allAccounts = this.wallets.map((w) => {
+      return this._getAddress(w)
+    })
+    allAccounts.concat(this.slpWallets.map((w) => {
+      return this._getAddress(w)
+    }))
+    return Promise.resolve(allAccounts)
   }
 
   // tx is an instance of the ethereumjs-transaction class.
@@ -142,6 +189,7 @@ class HdKeyring extends EventEmitter {
     const seed = BITBOX.Mnemonic.toSeed(mnemonic)
     this.hdWallet = BITBOX.HDNode.fromSeed(seed, 'bitcoincash')
     this.root = BITBOX.HDNode.derivePath(this.hdWallet, this.hdPath)
+    this.slpRoot = BITBOX.HDNode.derivePath(this.hdWallet, this.slpHdPath)
   }
 
   _getAddress(keypair) {
@@ -150,10 +198,18 @@ class HdKeyring extends EventEmitter {
 
   _getWalletForAccount (account) {
     const targetAddress = account
-    return this.wallets.find((w) => {
+    const wallet = this.wallets.find((w) => {
       const address = this._getAddress(w)
       return (address === targetAddress)
     })
+    
+    // Check for SLP wallet if not found
+    if (!wallet) {
+      return this.slpWallets.find((w) => {
+        const address = this._getAddress(w)
+        return (address === targetAddress)
+      })
+    }
   }
 }
 
