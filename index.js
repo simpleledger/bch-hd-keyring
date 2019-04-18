@@ -49,7 +49,8 @@ class HdKeyring extends EventEmitter {
 
   addAccounts (numberOfAccounts = 1) {
     if (!this.root || !this.slpRoot) {
-      this._initFromMnemonic(BITBOX.Mnemonic.generate(128))
+      const mnemonic = this.mnemonic ? this.mnemonic : BITBOX.Mnemonic.generate(128)
+      this._initFromMnemonic(mnemonic)
     }
 
     const oldLen = this.wallets.length
@@ -65,7 +66,7 @@ class HdKeyring extends EventEmitter {
     })
 
     // Add matching amount of SLP accounts
-    const slpAccountsToAdd = oldLen - this.slpWallets.length
+    const slpAccountsToAdd = this.wallets.length - this.slpWallets.length
     if (slpAccountsToAdd > 0) {
       this.addSlpAccounts(slpAccountsToAdd)
     }
@@ -75,7 +76,8 @@ class HdKeyring extends EventEmitter {
 
   addSlpAccounts (numberOfAccounts = 1) {
     if (!this.root || !this.slpRoot) {
-      this._initFromMnemonic(BITBOX.Mnemonic.generate(128))
+      const mnemonic = this.mnemonic ? this.mnemonic : BITBOX.Mnemonic.generate(128)
+      this._initFromMnemonic(mnemonic)
     }
 
     const oldLen = this.slpWallets.length
@@ -106,12 +108,10 @@ class HdKeyring extends EventEmitter {
   }
 
   getAllAccounts () {
-    const allAccounts = this.wallets.map((w) => {
+    const allWalelts = this.wallets.concat(this.slpWallets)
+    const allAccounts = allWalelts.map((w) => {
       return this._getAddress(w)
     })
-    allAccounts.concat(this.slpWallets.map((w) => {
-      return this._getAddress(w)
-    }))
     return Promise.resolve(allAccounts)
   }
 
@@ -209,6 +209,8 @@ class HdKeyring extends EventEmitter {
         const address = this._getAddress(w)
         return (address === targetAddress)
       })
+    } else {
+      return wallet
     }
   }
 }

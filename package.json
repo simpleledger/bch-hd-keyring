@@ -1,6 +1,6 @@
 {
   "name": "bch-hd-keyring",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "A simple standard interface for a seed phrase generated set of Bitcoin Cash accounts.",
   "main": "index.js",
   "scripts": {
