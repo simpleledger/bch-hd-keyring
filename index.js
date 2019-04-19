@@ -51,9 +51,6 @@ class HdKeyring extends EventEmitter {
     if (!this.root || !this.slpRoot) {
       const mnemonic = this.mnemonic ? this.mnemonic : BITBOX.Mnemonic.generate(128)
       this._initFromMnemonic(mnemonic)
-
-      // Initialize new keyrings with one account
-      numberOfAccounts = 1
     }
 
     const oldLen = this.wallets.length
