@@ -22,8 +22,8 @@ class HdKeyring extends EventEmitter {
     return Promise.resolve({
       mnemonic: this.mnemonic,
       numberOfAccounts: this.wallets.length,
-      hdPath: this.hdPath,
-      slpHdPath: this.slpHdPath,
+      hdPath: hdPathString,
+      slpHdPath: slpHdPathString,
     })
   }
 
@@ -51,6 +51,9 @@ class HdKeyring extends EventEmitter {
     if (!this.root || !this.slpRoot) {
       const mnemonic = this.mnemonic ? this.mnemonic : BITBOX.Mnemonic.generate(128)
       this._initFromMnemonic(mnemonic)
+
+      // Initialize new keyrings with one account
+      numberOfAccounts = 1
     }
 
     const oldLen = this.wallets.length
@@ -108,8 +111,8 @@ class HdKeyring extends EventEmitter {
   }
 
   getAllAccounts () {
-    const allWalelts = this.wallets.concat(this.slpWallets)
-    const allAccounts = allWalelts.map((w) => {
+    const allWallets = this.wallets.concat(this.slpWallets)
+    const allAccounts = allWallets.map((w) => {
       return this._getAddress(w)
     })
     return Promise.resolve(allAccounts)
