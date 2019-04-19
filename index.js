@@ -33,8 +33,8 @@ class HdKeyring extends EventEmitter {
     this.slpWallets = []
     this.mnemonic = null
     this.root = null
-    this.hdPath = opts.hdPath || hdPathString
-    this.slpHdPath = opts.slpHdPath || slpHdPathString
+    this.hdPath = hdPathString
+    this.slpHdPath = slpHdPathString
 
     if (opts.mnemonic) {
       this._initFromMnemonic(opts.mnemonic)
