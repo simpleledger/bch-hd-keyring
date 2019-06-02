@@ -1,6 +1,6 @@
 const EventEmitter = require('events').EventEmitter
 
-const BITBOXSDK = require('bitbox-sdk/lib/bitbox-sdk').default
+const BITBOXSDK = require('bitbox-sdk').BITBOX
 const BITBOX = new BITBOXSDK()
 
 // Options:
