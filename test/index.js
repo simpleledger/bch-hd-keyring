@@ -126,35 +126,31 @@ describe('hd-keyring', function() {
   //   })
   // })
 
-  // describe('#signPersonalMessage', function () {
-  //   it('returns the expected value', function (done) {
-  //     const address = firstAcct
-  //     const privateKey = new Buffer(privKeyHex, 'hex')
-  //     const message = '0x68656c6c6f20776f726c64'
+  describe('#signMessage', function () {
+    it('returns the expected value', function (done) {
+      const address = firstAcct
+      const message = 'bitcoin'
 
-  //     keyring.deserialize({
-  //       mnemonic: sampleMnemonic,
-  //       numberOfAccounts: 1,
-  //     })
-  //     .then(() => {
-  //       return keyring.signPersonalMessage(address, message)
-  //     })
-  //     .then((sig) => {
-  //       assert.notEqual(sig, message, 'something changed')
-
-  //       const restored = sigUtil.recoverPersonalSignature({
-  //         data: message,
-  //         sig,
-  //       })
-
-  //       assert.equal(restored, sigUtil.normalize(address), 'recovered address')
-  //       done()
-  //     })
-  //     .catch((reason) => {
-  //       console.error('failed because', reason)
-  //     })
-  //   })
-  // })
+      keyring.deserialize({
+        mnemonic: sampleMnemonic,
+        numberOfAccounts: 1,
+      })
+      .then(() => {
+        return keyring.signMessage(address, message)
+      })
+      .then((sig) => {
+        assert.equal(
+          sig,
+          'H9v7MCXtwB9tp4pxjcnUBpG9D6JZIhAyXAAVYq3vE21vdkC/2768N7E+ecR4GJfH1jC0aCJ08wSN9K1z3gDHDCQ=',
+          'signature invalid'
+        )
+        done()
+      })
+      .catch((reason) => {
+        console.error('failed because', reason)
+      })
+    })
+  })
 
   // describe('#signTypedData', function () {
   //   it('returns the expected value', function (done) {
@@ -180,57 +176,6 @@ describe('hd-keyring', function() {
   //     })
   //   })
   // })
-
-  describe('custom hd paths', function () {
-
-    it('can deserialize with an hdPath param and generate the same accounts.', function (done) {
-      const hdPathString = "m/44'/145'"
-
-      keyring.deserialize({
-        mnemonic: sampleMnemonic,
-        numberOfAccounts: 1,
-        hdPath: hdPathString,
-      })
-      .then(() => {
-        return keyring.getAccounts()
-      })
-      .then((addresses) => {
-        assert.equal(addresses[0], firstAcct)
-        return keyring.serialize()
-      })
-      .then((serialized) => {
-        assert.equal(serialized.hdPath, hdPathString)
-        done()
-      })
-      .catch((reason) => {
-        console.error('failed because', reason)
-      })
-    })
-
-    it('can deserialize with an hdPath param and generate different accounts.', function (done) {
-      const hdPathString = "m/44'/145'/1'"
-
-      keyring.deserialize({
-        mnemonic: sampleMnemonic,
-        numberOfAccounts: 1,
-        hdPath: hdPathString,
-      })
-      .then(() => {
-        return keyring.getAccounts()
-      })
-      .then((addresses) => {
-        assert.notEqual(addresses[0], firstAcct)
-        return keyring.serialize()
-      })
-      .then((serialized) => {
-        assert.equal(serialized.hdPath, hdPathString)
-        done()
-      })
-      .catch((reason) => {
-        console.log('failed because', reason)
-      })
-    })
-  })
 
   describe('create and restore 25 accounts', function () {
     it('should restore same accounts with no problem', async function () {
